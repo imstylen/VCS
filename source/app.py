@@ -1,48 +1,58 @@
-from genericpath import isdir
-import os
+import logging
+import shutil
+from pathlib import Path
 
 from file import File
+from source.file_handler import FileHandler
+from utils import get_current_time_str
+
 
 class Application:
-    
-    def __init__(self, in_directory:str):
-        self.directory:str = in_directory
-        self.backup_folder:str = self.setup_backup_folder()
-        
-        self.files:list(File) = []
+    def __init__(self, in_directory: str) -> None:
+        self.directory: Path = Path(in_directory)
+        self.backup_folder: Path = self.setup_backup_folder()
+        self.file_handler = FileHandler(self.backup_folder)
+
+        self.files: set[File] = set()
         self.update()
-        
-    def setup_backup_folder(self) -> str:
-        new_backup_folder:str = self.directory + "/.backup"
-        
-        if not os.path.exists(new_backup_folder):
-            os.mkdir(new_backup_folder)
-        
-        return new_backup_folder
-        
+
+    def setup_backup_folder(self) -> Path:
+        backup_folder: Path = self.directory / ".backup"
+        backup_folder.mkdir(exist_ok=True)
+
+        return backup_folder
+
+    def add_file(self, file_path: str | Path) -> None:
+        file = File(file_path)
+        self.files.add(file)
+        self.backup(file)
+
     def update(self) -> None:
-        items = os.listdir(self.directory)
-    
-        for item in items:
-            
-            if os.path.isdir(self.directory + "/" + item):
-                print("Skipping directory: " + item)
+        for directory_path in self.directory.iterdir():
+            if directory_path.is_dir():
+                logging.info("Skipping directory: %s", directory_path.name)
                 continue
-            
-            filtered_items = filter(lambda file: file.file_path == item, self.files)
-            found_files = list(filtered_items)
-            
-            file_handle:File = None
-            
-            if found_files == []:
-                file_handle = File(self, self.directory + "/" + item)
-                self.files.append(file_handle)
+
+            if File(directory_path) not in self.files:
+                self.add_file(directory_path)
             else:
-                print("Found: " + item + "... Skipping")
-                file_handle = found_files[0]
-            
-            file_handle.check()
-            
-    def loop(self) -> None:
-        pass
-        #sleep for a bit, then call update()
+                logging.info("Found: %s... Skipping", directory_path.name)
+
+    def backup(self, file: File) -> None:
+        if self.file_handler.needs_backup(file):
+            logging.info("Backing up: %s", file.file_path)
+            time_string = get_current_time_str()
+            logging.info("Current time string: %s", time_string)
+            backup_path = self.backup_folder / f"{file.file_path.stem}_{time_string}{file.file_path.suffix}"
+            logging.info(backup_path)
+            try:
+                shutil.copy(file.file_path, backup_path)
+                logging.info("Backup successful: %s", backup_path)
+            except FileNotFoundError:
+                logging.error("File not found: %s", file.file_path)
+            except PermissionError:
+                logging.error("Permission denied: %s", file.file_path)
+            except IOError:
+                logging.error("IO error occurred while backing up: %s", file.file_path)
+        else:
+            logging.info("No changes in: %s. Skipping backup.", file.file_path)
