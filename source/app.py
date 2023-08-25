@@ -51,8 +51,6 @@ class Application:
         self.backup_folder: Path = self._setup_backup_folder()
         self.file_handler = FileHandler(self.backup_folder)
 
-        self.update()
-
     def __repr__(self) -> str:
         """Returns a string representation of the Application object."""
         return f"Application({self.directory})"

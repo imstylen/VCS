@@ -63,8 +63,10 @@ def create_working_folder(path: Path = None) -> Path:
 
 
 def main(app_path: Path | str = None) -> None:
-    """Starts the application, creates the working folder if it doesn't exist, and then
-    closes the application.
+    """Starts the application, creates the working folder if it doesn't exist. Then The
+    application creates copies of files following the same directory structure within a
+    .backup folder. Each copy is timestamped and appended to the end of the original
+    filename in the format %Y-%m-%d_%H-%M-%S.
 
     Parameters
     ----------
@@ -75,7 +77,8 @@ def main(app_path: Path | str = None) -> None:
     app_path = Path(app_path) if app_path else None
     # Creates the working folder if it doesn't exist, continues if it does.
     app_path = create_working_folder(app_path)
-    Application(app_path)
+    application = Application(app_path)
+    application.update()
     logging.info("Closing application")
 
 
