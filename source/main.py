@@ -88,8 +88,8 @@ def main(app_path: Path | str = None) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the application.')
     # Use . for the current directory the CLI is run from
-    parser.add_argument('--path', type=str, default=DEFAULT_VCS_DIR_PATH, help="The path of the working directory or 'script' for script directory")
-    parser.add_argument('--log', type=str, default=DEFAULT_LOG_LEVEL, help='Set the log level')
+    parser.add_argument('--path', type=str, default=DEFAULT_VCS_DIR_PATH, help="The path for the VcsDirectory. ../VcsDirectory by default.")
+    parser.add_argument('--log', type=str, default=DEFAULT_LOG_LEVEL, help='Set the log level, default is INFO. options: DEBUG, INFO, WARNING, ERROR, CRITICAL')
     args = parser.parse_args()
 
     log_level = logging.getLevelName(args.log)
