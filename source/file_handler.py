@@ -12,8 +12,8 @@ import shutil
 from pathlib import Path
 from typing import Set
 
-from source.file import File
-from source.utils import get_current_time_str, timestamp_string_to_unix_float
+from file import File
+from utils import get_current_time_str, timestamp_string_to_unix_float
 
 
 class FileHandler:

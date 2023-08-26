@@ -8,7 +8,7 @@ Classes:
 from pathlib import Path
 from typing import Iterator
 
-from source.file_handler import FileHandler
+from file_handler import FileHandler
 
 
 class Application:
